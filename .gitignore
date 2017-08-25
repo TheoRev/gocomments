@@ -1,0 +1,10 @@
+*.exe
+main
+gocomments
+
+.vscode
+.vscode/
+
+#tests
+*.test
+test/*.test

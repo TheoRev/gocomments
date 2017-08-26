@@ -2,6 +2,7 @@ package configuration
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"os"
 
@@ -11,8 +12,7 @@ import (
 	_ "github.com/lib/pq"
 )
 
-// Configuration estructura de Configuration
-type Configuration struct {
+type configuration struct {
 	Server   string
 	Port     string
 	User     string
@@ -20,9 +20,8 @@ type Configuration struct {
 	Database string
 }
 
-// GetConfiguration obtiene el json de configuracion con la db
-func GetConfiguration() Configuration {
-	var c Configuration
+func getConfiguration() configuration {
+	var c configuration
 	file, err := os.Open("./config.json")
 	if err != nil {
 		log.Fatal(err)
@@ -37,6 +36,14 @@ func GetConfiguration() Configuration {
 	return c
 }
 
+// GetConnection obtiene y abre la conexion con la db
 func GetConnection() *gorm.DB {
-	c := GetConfiguration()
+	c := getConfiguration()
+	dsn := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable", c.User, c.Password, c.Server, c.Port, c.Database)
+	db, err := gorm.Open("postgres", dsn)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return db
 }

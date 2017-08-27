@@ -5,7 +5,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/TheoRev/DemoGoApp/migration"
+	"github.com/TheoRev/gocomments/migration"
 	"github.com/TheoRev/gocomments/routes"
 	"github.com/urfave/negroni"
 )
@@ -27,11 +27,11 @@ func main() {
 	n.UseHandler(router)
 
 	server := &http.Server{
-		Addr:    "3030",
+		Addr:    ":3030",
 		Handler: n,
 	}
 
 	log.Println("Iniciado el servidor en http://localhost:3030")
-	log.Println(server.ListendAndServe())
+	log.Println(server.ListenAndServe())
 	log.Println("Finalizó la ejecución del programa")
 }

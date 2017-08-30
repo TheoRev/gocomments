@@ -2,9 +2,11 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
 	"net/http"
 
+	"github.com/TheoRev/gocomments/commons"
 	"github.com/TheoRev/gocomments/migration"
 	"github.com/TheoRev/gocomments/routes"
 	"github.com/urfave/negroni"
@@ -14,7 +16,8 @@ import (
 
 func main() {
 	var migrate string
-	flag.StringVar(&migrate, "migrate", "no", "Genera la migraci+on a la DB")
+	flag.StringVar(&migrate, "migrate", "no", "Genera la migración a la DB")
+	flag.IntVar(&commons.Port, "port", 3030, "Puerto para el servidor web")
 	flag.Parse()
 	if migrate == "yes" {
 		log.Println("Inició la migración...")
@@ -27,11 +30,11 @@ func main() {
 	n.UseHandler(router)
 
 	server := &http.Server{
-		Addr:    ":3030",
+		Addr:    fmt.Sprintf(":%d", commons.Port),
 		Handler: n,
 	}
 
-	log.Println("Iniciado el servidor en http://localhost:3030")
+	log.Printf("Iniciado el servidor en http://localhost:%d", commons.Port)
 	log.Println(server.ListenAndServe())
 	log.Println("Finalizó la ejecución del programa")
 }

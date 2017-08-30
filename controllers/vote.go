@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/TheoRev/gocomments/commons"
@@ -22,7 +23,7 @@ func VoteRegister(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&vote)
 	if err != nil {
 		m.Code = http.StatusBadRequest
-		m.Message = fmt.Sprintf("Error al leer el usuario a registrar: %s", err)
+		m.Message = fmt.Sprintf("Error al leer el voto a registrar: %s", err)
 		commons.DisplayMessage(w, m)
 		return
 	}
@@ -35,7 +36,8 @@ func VoteRegister(w http.ResponseWriter, r *http.Request) {
 
 	if currentVote.ID == 0 {
 		db.Create(&vote)
-		err := updateCommentVotes(vote.CommentID, vote.Value)
+		log.Println("Voto: ", vote.Value)
+		err := updateCommentVotes(vote.CommentID, vote.Value, false)
 		if err != nil {
 			m.Code = http.StatusBadRequest
 			m.Message = err.Error()
@@ -50,7 +52,7 @@ func VoteRegister(w http.ResponseWriter, r *http.Request) {
 	} else if currentVote.Value != vote.Value {
 		currentVote.Value = vote.Value
 		db.Save(&currentVote)
-		err := updateCommentVotes(vote.CommentID, vote.Value)
+		err := updateCommentVotes(vote.CommentID, vote.Value, true)
 		if err != nil {
 			m.Code = http.StatusBadRequest
 			m.Message = err.Error()
@@ -69,7 +71,7 @@ func VoteRegister(w http.ResponseWriter, r *http.Request) {
 	commons.DisplayMessage(w, m)
 }
 
-func updateCommentVotes(commemtID uint, vote bool) (err error) {
+func updateCommentVotes(commemtID uint, vote, isUpdate bool) (err error) {
 	comment := models.Comment{}
 
 	db := configuration.GetConnection()
@@ -79,8 +81,14 @@ func updateCommentVotes(commemtID uint, vote bool) (err error) {
 	if rows > 0 {
 		if vote {
 			comment.Votes++
+			if isUpdate {
+				comment.Votes++
+			}
 		} else {
 			comment.Votes--
+			if isUpdate {
+				comment.Votes--
+			}
 		}
 		db.Save(&comment)
 	} else {
